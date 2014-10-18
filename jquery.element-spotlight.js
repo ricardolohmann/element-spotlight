@@ -6,105 +6,181 @@
  * Version 1.0
  */
  
-;(function(window, $, undefined) {
+;(function($, undefined) {
 
     // constants
-    var OVERLAY_COLOR = '#000000';
     var OVERLAY_ID = 'spotlight';
     var BOX_ID = 'spotlight-box';
-    var BOX_PADDING = 10;
+    var STOP_SCROLL_CLASS_NAME = 'element-spotlight-stop-scroll';
     var ESC_KEY = 27;
 
-    function getBorders($element) {
-        var $body = $(document.body);
-        var positions = $element.offset();
-        var positionTop = positions.top;
-        var positionLeft = positions.left;
-        var borders = [
-            positionTop - BOX_PADDING, // top
-            $body.width() - positionLeft - $element.width(), // right
-            $body.height() - positionTop - $element.height(), // bottom
-            positionLeft // left
-        ];
+    /**
+     * Updates box container according to it's content
+     */
+    function updateBox() {
+        var $element = $(this);
 
+        $('#' + BOX_ID).css({
+            'height': $element.height() + 'px',
+            'width':  $element.width() + 'px'
+        });
+    }
+
+    /**
+     * Updates overlay to set the box position
+     */
+    function updateOverlay() {
+        $('#' + OVERLAY_ID).css('border-width', getBorders.call(this));
+    }
+
+    /**
+     * Calculate borders
+     */
+    function getBorders() {
+        var $element = $(this);
+        var $body = $(document.body);
+        var padding = this.options.padding;
+
+        var positions = $element.offset();
+
+        var borderTop = positions.top;
+
+        var borderBottom = $body.height() - $element.height() - borderTop;
+        if (borderBottom < 0) {
+            borderBottom = 0;
+        }
+
+        var borderLeft = positions.left - 10;
+        if (borderLeft < 0) {
+            borderLeft = 0;
+        }
+
+        var borderRight = $body.width() - $element.width() - borderLeft - 20;
+        if (borderRight < 0) {
+            borderRight = 0;
+        }
+
+        var borders = [
+            borderTop,
+            borderRight,
+            borderBottom,
+            borderLeft
+        ];
+console.log(borders);
         return borders.join('px ') + 'px';
     }
 
-    function destroy() {
-        $(document.body).removeClass('stop-scroll');
-
-        $('#' + OVERLAY_ID).remove();
-
-        // trigger `onHide`
-        // settings.onHide.call(this, arguments);
-    }
-
+    /**
+     * The plugin
+     */
     $.fn.spotlight = function(options) {
 
-        // Default settings
-        var settings = $.extend({}, {
-            opacity: .5,
-            color: OVERLAY_COLOR,
-
-            // callbacks
-            onShow: function() {
-            },
-            onHide: function() {
-            }
-        }, options);
-
-        // check if it already exists
-        var $spotlight = $('#' + OVERLAY_ID);
-        if ($spotlight.length === 1) {
-            $spotlight.remove();
-        } else {
-
-            /**
-             * Remove when press ESC
-             */
-            $(document).keydown(function(e) {
-                var keyCode = e.which || e.keyCode;
-
-                if (keyCode === ESC_KEY) {
-                    destroy();
-                }
-            });
-        }
-
-        var $body = $(document.body);
-        var $element = $(this);
-        var $box = $('<div>', {
-            id: BOX_ID,
-            css: {
-                'height': $element.height() + (BOX_PADDING * 2) + 'px',
-                'width':  $element.width() + (BOX_PADDING * 2) + 'px'
-            }
-        });
-        var currentPos = $element.css('position');
+        var self = this;
 
         /*
-         * Create overlay
+         * Default options
          */
-        $spotlight = $('<div>', {
-            id: OVERLAY_ID,
-            css: {
-                'border-width': getBorders($element),
-                'border-color': 'rgba(0, 0, 0, ' + settings.opacity + ')'
+        this.defaultOptions = {
+            padding: 10,
+            onShow: this.onShow,
+            onHide: this.onHide
+        };
+
+        /*
+         * Init function
+         */
+        this.init = function() {
+            var settings = self.options = $.extend({}, self.defaultOptions, options);
+            var $spotlight = $('#' + OVERLAY_ID);
+            var $box;
+
+            if ($spotlight.length === 0) {
+
+                /**
+                 * Remove when press ESC
+                 */
+                $(document).keydown(function(e) {
+                    var keyCode = e.which || e.keyCode;
+
+                    if (keyCode === ESC_KEY) {
+                        self.onHide();
+                    }
+                });
+
+                /*
+                 * Create overlay
+                 */
+                $spotlight = $('<div>', {
+                    id: OVERLAY_ID
+                });
+
+                /*
+                 * Create the box that highlights selection
+                 */
+                $box = $('<div>', {
+                    id: BOX_ID
+                });
+
+                $spotlight.append($box);
+
+                // append overlay
+                $(document.body).append($spotlight);
+
+            } else {
+                $box = $('#' + BOX_ID);
             }
-        });
 
-        $spotlight.append($box);
+            updateOverlay.call(self);
 
-        // stop scroll
-        $body.addClass('stop-scroll');
+            updateBox.call(self);
 
-        // append overlay
-        $body.append($spotlight);
+            // trigger `onShow`
+            self.onShow.call(self, arguments);
+        };
 
-        // trigger `onShow`
-        settings.onShow.call(this, arguments);
+        /*
+         * Removes spotlight
+         */
+        this.destroy = function() {
+            self.onHide();
+            $('#' + OVERLAY_ID).remove();
+        };
+
+        /*
+         * Callback triggered on show
+         */
+        this.onShow = function() {
+            var options = self.options;
+
+            $('#' + OVERLAY_ID).show();
+
+            // remove scroll
+            $(document.body).addClass(STOP_SCROLL_CLASS_NAME);
+
+            if (typeof options.onShow === 'function') {
+                options.onShow.call(self, arguments);
+            }
+        };
+
+        /*
+         * Callback triggered on hide
+         */
+        this.onHide = function() {
+            var options = self.options;
+
+            $('#' + OVERLAY_ID).hide();
+
+            // add scroll again
+            $(document.body).removeClass(STOP_SCROLL_CLASS_NAME);
+
+            if (typeof options.onHide === 'function') {
+                options.onHide.call(self, arguments);
+            }
+        };
+
+        this.init();
 
         return this;
     };
 
-})(window, window.jQuery);
+})(window.jQuery);

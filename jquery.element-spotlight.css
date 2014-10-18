@@ -7,10 +7,14 @@
 	z-index: 9999;
 	top: 0;
 	left: 0;
+	border-color: #000000;
 	border-style: solid;
-	-webkit-background-clip': padding-box; /* for Safari */
+	-webkit-background-clip: padding-box; /* for Safari */
     background-clip: padding-box; /* for IE9+, Firefox 4+, Opera, Chrome */
-    pointer-events:  none;
+    pointer-events: none;
+    filter: alpha(opacity=50); /* IE */
+    -moz-opacity: 0.5; /* Mozilla */
+    opacity: 0.5; /* CSS3 */
 }
 
 #spotlight-box {
