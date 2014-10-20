@@ -1,15 +1,15 @@
 .element-spotlight-stop-scroll {
-	overflow: hidden;
+    overflow: hidden;
 }
 
 #spotlight {
-	position: absolute;
-	z-index: 9999;
-	top: 0;
-	left: 0;
-	border-color: #000000;
-	border-style: solid;
-	-webkit-background-clip: padding-box; /* for Safari */
+    position: absolute;
+    z-index: 9999;
+    top: 0;
+    left: 0;
+    border-color: #000000;
+    border-style: solid;
+    -webkit-background-clip: padding-box; /* for Safari */
     background-clip: padding-box; /* for IE9+, Firefox 4+, Opera, Chrome */
     pointer-events: none;
     filter: alpha(opacity=50); /* IE */
@@ -18,6 +18,6 @@
 }
 
 #spotlight-box {
-	border: 2px solid #F5F00F;
+    border: 2px solid #F5F00F;
     pointer-events: none;
 }

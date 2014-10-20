@@ -12,12 +12,14 @@
 			}
 
 			p {
-				width: 500px;
+				/*width: 500px;*/
 				margin: 0 auto;
+				padding: 15px;
 			}
 
 			.row {
 				display: inline-block;
+				padding: 10px;
 			}
 		</style>
 
@@ -26,7 +28,9 @@
 		<script type="text/javascript">
 			jQuery(function($) {
 				$('p').mouseover(function() {
-					$(this).spotlight();
+					$(this).spotlight({
+						padding: 10
+					});
 				});
 			});
 		</script>

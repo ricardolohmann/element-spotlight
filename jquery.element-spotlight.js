@@ -34,6 +34,14 @@
     }
 
     /**
+     * 
+     */
+    function getSumOfMarginAndPadding($element, position) {
+        return parseInt($element.css('margin-' + position), 10) +
+            parseInt($element.css('padding-' + position), 10);
+    }
+
+    /**
      * Calculate borders
      */
     function getBorders() {
@@ -43,19 +51,19 @@
 
         var positions = $element.offset();
 
-        var borderTop = positions.top;
+        var borderTop = positions.top + getSumOfMarginAndPadding($element, 'top');
 
-        var borderBottom = $body.height() - $element.height() - borderTop;
+        var borderBottom = $body.height() - $element.height() - borderTop + getSumOfMarginAndPadding($element, 'bottom');
         if (borderBottom < 0) {
             borderBottom = 0;
         }
 
-        var borderLeft = positions.left - 10;
+        var borderLeft = positions.left + getSumOfMarginAndPadding($element, 'left');
         if (borderLeft < 0) {
             borderLeft = 0;
         }
 
-        var borderRight = $body.width() - $element.width() - borderLeft - 20;
+        var borderRight = $body.width() - $element.width() - borderLeft + getSumOfMarginAndPadding($element, 'left');
         if (borderRight < 0) {
             borderRight = 0;
         }
@@ -81,9 +89,7 @@ console.log(borders);
          * Default options
          */
         this.defaultOptions = {
-            padding: 10,
-            onShow: this.onShow,
-            onHide: this.onHide
+            padding: 10
         };
 
         /*
@@ -130,6 +136,9 @@ console.log(borders);
                 $box = $('#' + BOX_ID);
             }
 
+            // remove scroll
+            $(document.body).addClass(STOP_SCROLL_CLASS_NAME);
+
             updateOverlay.call(self);
 
             updateBox.call(self);
@@ -153,9 +162,6 @@ console.log(borders);
             var options = self.options;
 
             $('#' + OVERLAY_ID).show();
-
-            // remove scroll
-            $(document.body).addClass(STOP_SCROLL_CLASS_NAME);
 
             if (typeof options.onShow === 'function') {
                 options.onShow.call(self, arguments);
